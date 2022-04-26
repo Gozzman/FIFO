@@ -1,0 +1,58 @@
+module FIFO(
+input CLK,
+input RST,
+input [7:0]DATA_INPUT,
+input BNT_WRITE,
+input BNT_READ,
+output reg EMPTY,
+output reg FULL,
+output reg [7:0]DATA_OUT
+);
+
+
+reg [1:0]CT_HEAD = 0;
+reg [1:0]CT_HEAD_NEXT = 0;
+reg [1:0]CT_TAIL = 0;
+reg [1:0]CT_TAIL_NEXT = 0;
+reg [7:0]FIFO[3:0];
+
+initial begin
+	EMPTY = 1;
+	FULL = 0;
+end
+
+always@(posedge CLK, posedge RST)
+begin
+
+	if(RST)
+	begin
+		CT_HEAD = 0;//write
+		CT_HEAD_NEXT = 2'b01;
+		CT_TAIL = 0;//read
+		CT_TAIL_NEXT = 2'b01;
+		EMPTY = 1;
+		FULL = 0;
+	end
+	
+	if(BTN_WRITE && FULL != 1)
+	begin
+		FIFO[CT_HEAD] = DATA_INPUT;
+		CT_HEAD = CT_HEAD + 1;
+		CT_HEAD_NEXT = CT_HEAD_NEXT; +1;
+		
+			if(CT_TAIL_NEXT > CT_TAIL)
+				FULL = 1;
+	end
+	
+	if(BTN_READ)
+	begin
+		DATA_OUT = FIFO[CT_TAIL];
+		CT_TAIL = CT_TAIL + 1;
+		CT_TAIL_NEXT = CT_TAIL_NEXT + 1;
+			if(CT_TAIL >= CT_HEAD)
+				EMPTY = 1;
+	end
+	
+end
+
+endmodue
